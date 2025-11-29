@@ -10,6 +10,7 @@ export interface PostData {
   id: string;
   title: string;
   date: string;
+  tags?: string[];
   contentHtml?: string;
 }
 
@@ -32,6 +33,7 @@ export function getSortedPostsData(): PostData[] {
       id,
       title: matterResult.data.title as string,
       date: matterResult.data.date as string,
+      tags: (matterResult.data.tags as string[]) || [],
     };
   });
 
@@ -74,6 +76,18 @@ export async function getPostData(id: string): Promise<PostData> {
     id,
     title: matterResult.data.title as string,
     date: matterResult.data.date as string,
+    tags: (matterResult.data.tags as string[]) || [],
     contentHtml,
   };
+}
+
+export function getAllTags(): string[] {
+  const allPostsData = getSortedPostsData();
+  const tagsSet = new Set<string>();
+
+  allPostsData.forEach((post) => {
+    post.tags?.forEach((tag) => tagsSet.add(tag));
+  });
+
+  return Array.from(tagsSet).sort();
 }

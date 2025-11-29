@@ -1,23 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getSortedPostsData, PostData } from "@/lib/posts";
+import { getSortedPostsData, PostData, getAllTags } from "@/lib/posts";
 import { GetStaticProps } from "next";
 import Head from "next/head";
+import { useState } from "react";
 
 interface HomeProps {
   allPostsData: PostData[];
+  allTags: string[];
 }
 
 export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const allPostsData = getSortedPostsData();
+  const allTags = getAllTags();
   return {
     props: {
       allPostsData,
+      allTags,
     },
   };
 };
 
-export default function Home({ allPostsData }: HomeProps) {
+export default function Home({ allPostsData, allTags }: HomeProps) {
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  const filteredPosts = selectedTag
+    ? allPostsData.filter((post) => post.tags?.includes(selectedTag))
+    : allPostsData;
   return (
     <>
       <Head>
@@ -40,18 +49,61 @@ export default function Home({ allPostsData }: HomeProps) {
             <h1 className="text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
               Blog
             </h1>
+
+            {/* Tag Filter */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedTag(null)}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                  selectedTag === null
+                    ? "bg-zinc-950 text-white dark:bg-zinc-50 dark:text-black"
+                    : "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700"
+                }`}
+              >
+                All
+              </button>
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(tag)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    selectedTag === tag
+                      ? "bg-zinc-950 text-white dark:bg-zinc-50 dark:text-black"
+                      : "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+
+            {/* Posts List */}
             <ul className="flex flex-col gap-4">
-              {allPostsData.map(({ id, date, title }) => (
-                <li key={id} className="flex flex-col gap-1">
+              {filteredPosts.map(({ id, date, title, tags }) => (
+                <li key={id} className="flex flex-col gap-2">
                   <Link
                     href={`/posts/${id}`}
                     className="text-xl font-medium text-zinc-950 dark:text-zinc-50 hover:text-zinc-600 dark:hover:text-zinc-400 transition-colors"
                   >
                     {title}
                   </Link>
-                  <small className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {date}
-                  </small>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <small className="text-sm text-zinc-600 dark:text-zinc-400">
+                      {date}
+                    </small>
+                    {tags && tags.length > 0 && (
+                      <div className="flex gap-2">
+                        {tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="text-xs px-2 py-1 rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>

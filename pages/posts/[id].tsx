@@ -42,13 +42,27 @@ export default function Post({ postData }: PostProps) {
           </div>
 
           <article className="flex flex-col gap-6">
-            <header className="flex flex-col gap-2">
+            <header className="flex flex-col gap-3">
               <h1 className="text-4xl font-semibold leading-tight tracking-tight text-black dark:text-zinc-50">
                 {postData.title}
               </h1>
-              <time className="text-sm text-zinc-600 dark:text-zinc-400">
-                {postData.date}
-              </time>
+              <div className="flex items-center gap-3 flex-wrap">
+                <time className="text-sm text-zinc-600 dark:text-zinc-400">
+                  {postData.date}
+                </time>
+                {postData.tags && postData.tags.length > 0 && (
+                  <div className="flex gap-2">
+                    {postData.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-xs px-2 py-1 rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </header>
 
             <div
