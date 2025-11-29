@@ -22,11 +22,24 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
 };
 
 export default function Home({ allPostsData, allTags }: HomeProps) {
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const filteredPosts = selectedTag
-    ? allPostsData.filter((post) => post.tags?.includes(selectedTag))
-    : allPostsData;
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const clearAllTags = () => {
+    setSelectedTags([]);
+  };
+
+  const filteredPosts =
+    selectedTags.length > 0
+      ? allPostsData.filter((post) =>
+          selectedTags.every((tag) => post.tags?.includes(tag))
+        )
+      : allPostsData;
   return (
     <>
       <Head>
@@ -51,30 +64,35 @@ export default function Home({ allPostsData, allTags }: HomeProps) {
             </h1>
 
             {/* Tag Filter */}
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedTag(null)}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                  selectedTag === null
-                    ? "bg-zinc-950 text-white dark:bg-zinc-50 dark:text-black"
-                    : "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700"
-                }`}
-              >
-                All
-              </button>
-              {allTags.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => setSelectedTag(tag)}
-                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                    selectedTag === tag
-                      ? "bg-zinc-950 text-white dark:bg-zinc-50 dark:text-black"
-                      : "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700"
-                  }`}
-                >
-                  {tag}
-                </button>
-              ))}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  Filter by tags:
+                </span>
+                {selectedTags.length > 0 && (
+                  <button
+                    onClick={clearAllTags}
+                    className="text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-50 underline transition-colors"
+                  >
+                    Clear all ({selectedTags.length})
+                  </button>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {allTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      selectedTags.includes(tag)
+                        ? "bg-zinc-950 text-white dark:bg-zinc-50 dark:text-black"
+                        : "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200 hover:bg-zinc-300 dark:hover:bg-zinc-700"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Posts List */}
